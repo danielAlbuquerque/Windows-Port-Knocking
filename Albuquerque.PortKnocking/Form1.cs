@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using NetFwTypeLib;
 using System.Windows.Forms;
+using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace Albuquerque.PortKnocking
 {
@@ -22,8 +24,16 @@ namespace Albuquerque.PortKnocking
         {
             InitializeComponent();
 
+            if (!IsAdministrator)
+            {
+                MessageBox.Show("Execute o programa como administrador");
+                Close();
+            }
+
             iniFile = new IniFile("Settings.ini");
         }
+
+        public static bool IsAdministrator => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -46,18 +56,6 @@ namespace Albuquerque.PortKnocking
             if (iniFile.KeyExists("command", "command2"))
                 commandText12.Text = iniFile.Read("command", "command2");
 
-            if (iniFile.KeyExists("protocol", "command1"))
-            {
-                string protocol = iniFile.Read("protocol", "command1");
-                if (protocol.ToUpper() == "TCP")
-                {
-                    radioButton1.Select();
-                } else
-                {
-                    radioButton2.Select();
-                }
-            }
-
             if (iniFile.KeyExists("protocol", "command2"))
             {
                 string protocol = iniFile.Read("protocol", "command2");
@@ -70,6 +68,32 @@ namespace Albuquerque.PortKnocking
                     radioButton3.Select();
                 }
             }
+
+            if (iniFile.KeyExists("protocol", "command1"))
+            {
+                string protocol = iniFile.Read("protocol", "command1");
+                if (protocol.ToUpper() == "TCP")
+                {
+                    radioButton1.Select();
+                }
+                else
+                {
+                    radioButton2.Select();
+                }
+            }
+
+            SetTimeout(() =>
+            {
+                Start();
+            }, 1000);
+        }
+
+        void SetTimeout(Action action, int ms)
+        {
+            Task.Delay(ms).ContinueWith((task) =>
+            {
+                action();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -101,6 +125,17 @@ namespace Albuquerque.PortKnocking
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Start();
+        }
+
+        private void Start()
+        {
+            if (!IsFormValid())
+            {
+                MessageBox.Show("Preencha os dados corretamente");
+                return;
+            }
+
             if (button1.Text != "Parar")
             {
                 comboBox1.Enabled = false;
@@ -109,8 +144,8 @@ namespace Albuquerque.PortKnocking
                 ICaptureDevice interfaceResult = DeviceManager.GetInterfaceByIndex(comboBox1.SelectedIndex);
                 IEnumerable<string> ports1 = portsTxtBox1.Text.Split(',').ToList();
                 IEnumerable<string> ports2 = portsTxtBox2.Text.Split(',').ToList();
-                List<int> intPorts1 = ports1.ToList().Select(int.Parse).ToList();
-                List<int> intPorts2 = ports2.ToList().Select(int.Parse).ToList();
+                List<int> intPorts1 = ports1.Select(int.Parse).ToList();
+                List<int> intPorts2 = ports2.Select(int.Parse).ToList();
                 PortKnocker portKnocker1 = new PortKnocker(intPorts1, 60);
                 PortKnocker portKnocker2 = new PortKnocker(intPorts2, 60);
                 Sniffer sniffer1 = new Sniffer(portKnocker1, commandText1.Text, protocol1);
@@ -136,7 +171,9 @@ namespace Albuquerque.PortKnocking
                 iniFile.Write("sequence", portsTxtBox2.Text, "command2");
                 iniFile.Write("command", commandText12.Text, "command2");
                 iniFile.Write("protocol", protocol2, "command2");
-            } else {
+            }
+            else
+            {
                 thread1.Abort();
                 thread2.Abort();
                 var fwConf = new FirewallConf();
@@ -148,8 +185,6 @@ namespace Albuquerque.PortKnocking
             }
         }
 
-  
-
         private void radioButton4_CheckedChanged(object sender, EventArgs e)
         {
             protocol2 = "tcp";
@@ -158,6 +193,19 @@ namespace Albuquerque.PortKnocking
         private void radioButton3_CheckedChanged(object sender, EventArgs e)
         {
             protocol2 = "udp";
+        }
+
+        private bool IsFormValid()
+        {
+            if (this.comboBox1.SelectedItem != null && !string.IsNullOrEmpty(this.commandText1.Text) && !string.IsNullOrEmpty(this.commandText12.Text) && !string.IsNullOrEmpty(this.portsTxtBox1.Text) && !string.IsNullOrEmpty(portsTxtBox2.Text))
+                return true;
+            return false;
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (thread1.IsAlive) thread1.Abort();
+            if (thread2.IsAlive) thread2.Abort();
         }
     }
 }

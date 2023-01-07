@@ -39,7 +39,6 @@ namespace Albuquerque.PortKnocking
             device.Open(DeviceModes.Promiscuous, readTimeoutMilliseconds);
 
             device.Filter = filter;
-            // Start capture packets
             device.Capture();
 
         }

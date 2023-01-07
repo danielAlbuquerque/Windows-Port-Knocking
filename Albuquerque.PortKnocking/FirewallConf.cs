@@ -12,7 +12,6 @@ namespace Albuquerque.PortKnocking
             Type Policy2 = Type.GetTypeFromProgID("HNetCfg.FwPolicy2", false);
             INetFwPolicy2 FwPolicy = (INetFwPolicy2)Activator.CreateInstance(Policy2);
             INetFwRules rules = FwPolicy.Rules;
-            //Delete if exist to avoid deplicated rules
             DeleteRule(name);
             Type RuleType = Type.GetTypeFromProgID("HNetCfg.FWRule");
             INetFwRule rule = (INetFwRule)Activator.CreateInstance(RuleType);
