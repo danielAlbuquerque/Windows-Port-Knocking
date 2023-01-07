@@ -45,11 +45,11 @@ namespace Albuquerque.PortKnocking
 
         private void Device_OnPacketArrival(object sender, PacketCapture e)
         {
-            ushort destinationPort;
-            if (_protocol.ToUpper() == "TCP")
-                destinationPort = e.GetPacket().GetPacket().Extract<TcpPacket>().DestinationPort;
+            ushort destinationPort = e.GetPacket().GetPacket().Extract<TransportPacket>().DestinationPort;
+            /*if (_protocol.ToUpper() == "TCP")
+                destinationPort = e.GetPacket().GetPacket().Extract<TransportPacket>().DestinationPort;
             else
-                destinationPort = e.GetPacket().GetPacket().Extract<UdpPacket>().DestinationPort;
+                destinationPort = e.GetPacket().GetPacket().Extract<TransportPacket>().DestinationPort;*/
             Console.WriteLine(destinationPort);
             if (_portKnocker.Check(destinationPort))
             {

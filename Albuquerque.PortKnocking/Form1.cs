@@ -14,8 +14,7 @@ namespace Albuquerque.PortKnocking
     public partial class Form1 : Form
     {
         IniFile iniFile;
-        string protocol1 = "tcp";
-        string protocol2 = "tcp";
+        string protocol = "tcp";
 
         Thread thread1 = null;
         Thread thread2 = null;
@@ -41,8 +40,8 @@ namespace Albuquerque.PortKnocking
             comboBox1.DisplayMember = "Value";
             comboBox1.ValueMember = "key";
 
-            if (iniFile.KeyExists("last", "interfaces"))
-                comboBox1.SelectedIndex = Int32.Parse(iniFile.Read("last", "interfaces"));
+            if (iniFile.KeyExists("lastInterfaceIndex", "general"))
+                comboBox1.SelectedIndex = Int32.Parse(iniFile.Read("lastInterfaceIndex", "general"));
 
             if (iniFile.KeyExists("sequence", "command1"))
                 portsTxtBox1.Text = iniFile.Read("sequence", "command1");
@@ -56,22 +55,9 @@ namespace Albuquerque.PortKnocking
             if (iniFile.KeyExists("command", "command2"))
                 commandText12.Text = iniFile.Read("command", "command2");
 
-            if (iniFile.KeyExists("protocol", "command2"))
+            if (iniFile.KeyExists("protocol", "general"))
             {
-                string protocol = iniFile.Read("protocol", "command2");
-                if (protocol.ToUpper() == "TCP")
-                {
-                    radioButton4.Select();
-                }
-                else
-                {
-                    radioButton3.Select();
-                }
-            }
-
-            if (iniFile.KeyExists("protocol", "command1"))
-            {
-                string protocol = iniFile.Read("protocol", "command1");
+                string protocol = iniFile.Read("protocol", "general");
                 if (protocol.ToUpper() == "TCP")
                 {
                     radioButton1.Select();
@@ -84,7 +70,14 @@ namespace Albuquerque.PortKnocking
 
             SetTimeout(() =>
             {
-                Start();
+                if (iniFile.KeyExists("running", "general"))
+                {
+                    bool running = bool.Parse(iniFile.Read("running", "general"));
+                    if (running && IsFormValid())
+                    {
+                        Start();
+                    }
+                }
             }, 1000);
         }
 
@@ -115,12 +108,12 @@ namespace Albuquerque.PortKnocking
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            protocol1 = "tcp";
+            protocol = "tcp";
         }
 
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
-            protocol1 = "udp";
+            protocol = "udp";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -144,40 +137,37 @@ namespace Albuquerque.PortKnocking
                 ICaptureDevice interfaceResult = DeviceManager.GetInterfaceByIndex(comboBox1.SelectedIndex);
                 IEnumerable<string> ports1 = portsTxtBox1.Text.Split(',').ToList();
                 IEnumerable<string> ports2 = portsTxtBox2.Text.Split(',').ToList();
-                List<int> intPorts1 = ports1.Select(int.Parse).ToList();
-                List<int> intPorts2 = ports2.Select(int.Parse).ToList();
-                PortKnocker portKnocker1 = new PortKnocker(intPorts1, 60);
-                PortKnocker portKnocker2 = new PortKnocker(intPorts2, 60);
-                Sniffer sniffer1 = new Sniffer(portKnocker1, commandText1.Text, protocol1);
-                Sniffer sniffer2 = new Sniffer(portKnocker2, commandText12.Text, protocol2);
-                var filter1 = Sniffer.GenerateFilterString(ports1, protocol1);
-                var filter2 = Sniffer.GenerateFilterString(ports2, protocol2);
+                
+                PortKnocker portKnocker1 = new PortKnocker(ports1.Select(int.Parse).ToList(), 60);
+                Sniffer sniffer1 = new Sniffer(portKnocker1, commandText1.Text, protocol);
+
+                PortKnocker portKnocker2 = new PortKnocker(ports2.Select(int.Parse).ToList(), 60);
+                Sniffer sniffer2 = new Sniffer(portKnocker2, commandText12.Text, protocol);
+
                 thread1 = new Thread(() =>
                 {
-                    sniffer1.Sniff(interfaceResult, filter1);
+                    sniffer1.Sniff(interfaceResult, Sniffer.GenerateFilterString(ports1, protocol));
                 });
                 thread2 = new Thread(() =>
                 {
-                    sniffer2.Sniff(interfaceResult, filter2);
+                    sniffer2.Sniff(interfaceResult, Sniffer.GenerateFilterString(ports2, protocol));
                 });
                 thread1.Start();
                 thread2.Start();
                 button1.Text = "Parar";
 
-                iniFile.Write("last", comboBox1.SelectedIndex.ToString(), "interfaces");
+                iniFile.Write("lastInterfaceIndex", comboBox1.SelectedIndex.ToString(), "general");
+                iniFile.Write("protocol", protocol, "general");
                 iniFile.Write("sequence", portsTxtBox1.Text, "command1");
                 iniFile.Write("command", commandText1.Text, "command1");
-                iniFile.Write("protocol", protocol1, "command1");
                 iniFile.Write("sequence", portsTxtBox2.Text, "command2");
                 iniFile.Write("command", commandText12.Text, "command2");
-                iniFile.Write("protocol", protocol2, "command2");
+                iniFile.Write("running", "true", "general");
             }
             else
             {
                 thread1.Abort();
                 thread2.Abort();
-                var fwConf = new FirewallConf();
-                fwConf.DeleteRule("portknocking");
                 groupBox1.Enabled = true;
                 groupBox2.Enabled = true;
                 comboBox1.Enabled = true;
@@ -185,27 +175,18 @@ namespace Albuquerque.PortKnocking
             }
         }
 
-        private void radioButton4_CheckedChanged(object sender, EventArgs e)
-        {
-            protocol2 = "tcp";
-        }
-
-        private void radioButton3_CheckedChanged(object sender, EventArgs e)
-        {
-            protocol2 = "udp";
-        }
-
         private bool IsFormValid()
         {
-            if (this.comboBox1.SelectedItem != null && !string.IsNullOrEmpty(this.commandText1.Text) && !string.IsNullOrEmpty(this.commandText12.Text) && !string.IsNullOrEmpty(this.portsTxtBox1.Text) && !string.IsNullOrEmpty(portsTxtBox2.Text))
+            if (comboBox1.SelectedItem != null && !string.IsNullOrEmpty(commandText1.Text) && !string.IsNullOrEmpty(commandText12.Text) && !string.IsNullOrEmpty(portsTxtBox1.Text) && !string.IsNullOrEmpty(portsTxtBox2.Text))
                 return true;
             return false;
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (thread1.IsAlive) thread1.Abort();
-            if (thread2.IsAlive) thread2.Abort();
+            if (thread1 != null && thread1.IsAlive) thread1.Abort();
+            if (thread2 != null && thread2.IsAlive) thread2.Abort();
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
     }
 }

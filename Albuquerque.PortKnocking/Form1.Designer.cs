@@ -43,9 +43,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.portsTxtBox2 = new System.Windows.Forms.TextBox();
-            this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.commandText12 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
@@ -77,14 +75,14 @@
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(15, 38);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(457, 21);
+            this.comboBox1.Size = new System.Drawing.Size(328, 21);
             this.comboBox1.TabIndex = 1;
             // 
             // portsTxtBox1
             // 
             this.portsTxtBox1.Location = new System.Drawing.Point(18, 32);
             this.portsTxtBox1.Name = "portsTxtBox1";
-            this.portsTxtBox1.Size = new System.Drawing.Size(310, 20);
+            this.portsTxtBox1.Size = new System.Drawing.Size(430, 20);
             this.portsTxtBox1.TabIndex = 2;
             // 
             // label2
@@ -128,7 +126,7 @@
             // 
             this.radioButton1.AutoSize = true;
             this.radioButton1.Checked = true;
-            this.radioButton1.Location = new System.Drawing.Point(348, 32);
+            this.radioButton1.Location = new System.Drawing.Point(363, 39);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(46, 17);
             this.radioButton1.TabIndex = 7;
@@ -140,7 +138,7 @@
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(400, 32);
+            this.radioButton2.Location = new System.Drawing.Point(415, 39);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(48, 17);
             this.radioButton2.TabIndex = 8;
@@ -152,9 +150,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.portsTxtBox1);
-            this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Controls.Add(this.commandText1);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Location = new System.Drawing.Point(15, 77);
@@ -167,9 +163,7 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Controls.Add(this.radioButton3);
             this.groupBox2.Controls.Add(this.portsTxtBox2);
-            this.groupBox2.Controls.Add(this.radioButton4);
             this.groupBox2.Controls.Add(this.commandText12);
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Location = new System.Drawing.Point(15, 206);
@@ -189,37 +183,12 @@
             this.label4.TabIndex = 3;
             this.label4.Text = "Sequência de portas:";
             // 
-            // radioButton3
-            // 
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Location = new System.Drawing.Point(400, 32);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(48, 17);
-            this.radioButton3.TabIndex = 8;
-            this.radioButton3.TabStop = true;
-            this.radioButton3.Text = "UDP";
-            this.radioButton3.UseVisualStyleBackColor = true;
-            this.radioButton3.CheckedChanged += new System.EventHandler(this.radioButton3_CheckedChanged);
-            // 
             // portsTxtBox2
             // 
             this.portsTxtBox2.Location = new System.Drawing.Point(18, 32);
             this.portsTxtBox2.Name = "portsTxtBox2";
-            this.portsTxtBox2.Size = new System.Drawing.Size(310, 20);
+            this.portsTxtBox2.Size = new System.Drawing.Size(430, 20);
             this.portsTxtBox2.TabIndex = 2;
-            // 
-            // radioButton4
-            // 
-            this.radioButton4.AutoSize = true;
-            this.radioButton4.Checked = true;
-            this.radioButton4.Location = new System.Drawing.Point(348, 32);
-            this.radioButton4.Name = "radioButton4";
-            this.radioButton4.Size = new System.Drawing.Size(46, 17);
-            this.radioButton4.TabIndex = 7;
-            this.radioButton4.TabStop = true;
-            this.radioButton4.Text = "TCP";
-            this.radioButton4.UseVisualStyleBackColor = true;
-            this.radioButton4.CheckedChanged += new System.EventHandler(this.radioButton4_CheckedChanged);
             // 
             // commandText12
             // 
@@ -244,8 +213,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 420);
             this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.radioButton2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button1);
+            this.Controls.Add(this.radioButton1);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -280,9 +251,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.TextBox portsTxtBox2;
-        private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.TextBox commandText12;
         private System.Windows.Forms.Label label5;
     }
